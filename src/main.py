@@ -60,16 +60,17 @@ class Node:
 	
 	def update_neighbors(self, grid):
 		self.neighbors = []
-		rows_tot = len(grid)  # Total number of rows in the grid
-		
-		if self.row < rows_tot - 1 and not grid[self.row + 1][self.col].is_barrier():
-			self.neighbors.append(grid[self.row + 1][self.col])  # Down
-		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier():
-			self.neighbors.append(grid[self.row - 1][self.col])  # Up
-		if self.col < rows_tot - 1 and not grid[self.row][self.col + 1].is_barrier():
-			self.neighbors.append(grid[self.row][self.col + 1])  # Right
-		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier():
-			self.neighbors.append(grid[self.row][self.col - 1])  # Left
+		if self.row < self.rows_tot - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
+			self.neighbors.append(grid[self.row + 1][self.col])
+
+		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+			self.neighbors.append(grid[self.row - 1][self.col])
+
+		if self.col < self.rows_tot - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+			self.neighbors.append(grid[self.row][self.col + 1])
+
+		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+			self.neighbors.append(grid[self.row][self.col - 1])
 	
 
 def manhattan(p1, p2):
@@ -115,10 +116,14 @@ def get_clicked_pos(pos, rows, width):
 	return row, col
 
 def reconstruct_path(came_from, current, draw):
-	while current in came_from:
-		current = came_from[current]
-		current.state = State.PATH
-		draw()
+    while current in came_from:
+        current = came_from[current]
+        if current is None:
+            break
+        if current.state != State.START and current.state != State.FINISH:
+            current.state = State.PATH
+        draw()
+
 
 def bfs(draw, grid, start, end):
 	que = []
@@ -140,7 +145,6 @@ def bfs(draw, grid, start, end):
 				came_from[n] = cur 
 				# mark it as "visited," and draw the updated grid:
 				n.state = State.VISITED
-		
 				draw()
 		
 	return False # path not found 
@@ -192,13 +196,13 @@ def main(win, width):
 					for row in grid:
 						for spot in row:
 							spot.update_neighbors(grid)
-						bfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
+					bfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
 				#clear grid
 				if event.key == pygame.K_c:  # C-key
 					start = None
 					end = None
 					grid = make_grid(ROWS, width)
-
+		pygame.display.update()
 	pygame.quit()
 
 if __name__ == "__main__":
