@@ -92,8 +92,20 @@ class Node:
         pygame.draw.rect(win, self.state.value, (self.x, self.y, self.width, self.width))
 
     def update_neighbors(self, grid):
-        pass
-
+        # check all directions for barriers
+        self.neighbors = []
+        # In the same column as self check if row below exists and if we can add it (not barrier)
+        if self.row < self.rows_tot -1 and not grid[self.row + 1][self.col].is_barrier():
+             self.neighbors.append(grid[self.row -1][self.col].state)
+        # check row above
+        if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+            self.neighbors.append(grid[self.row - 1][self.col])
+        # In the same row as self check if col to the right exists and if we can add it (not barrier)
+        if self.col < self.rows_tot - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+            self.neighbors.append(grid[self.row][self.col + 1])
+        # check col left
+        if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+            self.neighbors.append(grid[self.row][self.col - 1])
 
 def manhattan(p1, p2):
     x1, y1 = p1
@@ -137,6 +149,10 @@ def get_clicked_pos(pos, rows, width):
 
 	return row, col
 
+def bfs(draw, grid, start, end):
+    pass
+
+
 def main(win, width):
 	ROWS = 50
 	grid = make_grid(ROWS, width)
@@ -150,41 +166,45 @@ def main(win, width):
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				run = False
-
-			if pygame.mouse.get_pressed()[0]: # LEFT
-				pos = pygame.mouse.get_pos()
-				row, col = get_clicked_pos(pos, ROWS, width)
-				spot = grid[row][col]
-				if not start and spot != end: #init start
+            
+            #Assigning Grid Node
+			if pygame.mouse.get_pressed()[0]: # LEFT-CLICK
+				pos = pygame.mouse.get_pos() 
+				row, col = get_clicked_pos(pos, ROWS, width) #get the node position
+				spot = grid[row][col] #get node at pos
+				if not start and spot != end: #init start anywhere but end node
 					start = spot
 					start.make_start()
 
-				elif not end and spot != start: #init end
+				elif not end and spot != start: #init end anywhere but end node
 					end = spot
 					end.make_end()
 
-				elif spot != end and spot != start: #make barrier
+				elif spot != end and spot != start: #make barrier anywhere but start/end node
 					spot.make_barrier()
 
-			elif pygame.mouse.get_pressed()[2]: # RIGHT
-				pos = pygame.mouse.get_pos()
-				row, col = get_clicked_pos(pos, ROWS, width)
-				spot = grid[row][col]
+            # Clearing Grid Node
+			elif pygame.mouse.get_pressed()[2]: # RIGHT-CLICK
+				pos = pygame.mouse.get_pos() 
+				row, col = get_clicked_pos(pos, ROWS, width) #get the node position
+				spot = grid[row][col] #get node at pos
 				spot.reset()
 				if spot == start:
 					start = None
 				elif spot == end:
 					end = None
 
+            #begin Algorithm by updating neighbors for each node in grid
 			if event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_SPACE and start and end:
 					for row in grid:
 						for spot in row:
 							spot.update_neighbors(grid)
 
-					algorithm(lambda: draw(win, grid, ROWS, width), grid, start, end)
-
-				if event.key == pygame.K_c:
+					bfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
+                
+                #clear grid
+				if event.key == pygame.K_c:  # C-key
 					start = None
 					end = None
 					grid = make_grid(ROWS, width)
