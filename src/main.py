@@ -1,6 +1,6 @@
 import pygame
 import math
-from queue import PriorityQueue
+from queue import PriorityQueue, Queue
 from enum import Enum
 
 
@@ -39,14 +39,14 @@ class Node:
     def __lt__(self, other):
         return False
 
-    def make_start(self):
-        self.state = State.START
+    # def make_start(self):
+    #     self.state = State.START
     
-    def make_end(self):
-        self.state = State.FINISH
+    # def make_end(self):
+    #     self.state = State.FINISH
 
-    def make_barrier(self):
-        self.state = State.BARRIER
+    # def make_barrier(self):
+    #     self.state = State.BARRIER
 
     def is_normal(self):
         return self.state == State.NORMAL
@@ -150,8 +150,26 @@ def get_clicked_pos(pos, rows, width):
 	return row, col
 
 def bfs(draw, grid, start, end):
-    pass
+    q = Queue()
+    Queue.put(start) #insert start node
+    came_from = {} # dict to track parents of each visited node (visited nodes)
+    came_from[start] = None
 
+    while not Queue.empty():
+        cur = q.get()#remove node from queue and set to current node
+        if cur == end:
+            reconstruct_path(came_from, end, draw) # show path if found from end to start
+            end.make_end()
+            return True
+        
+        for n in cur.neighbors:
+             if n not in came_from: # check if node hasn't been visited
+                # update its came_from value with the current node, add it to the queue
+                Queue.put(n)
+                came_from[n] = cur 
+                # mark it as "visited," and draw the updated grid:
+                n.state = State.VISITED
+                draw()
 
 def main(win, width):
 	ROWS = 50
@@ -174,14 +192,14 @@ def main(win, width):
 				spot = grid[row][col] #get node at pos
 				if not start and spot != end: #init start anywhere but end node
 					start = spot
-					start.make_start()
+					start.state = State.START
 
 				elif not end and spot != start: #init end anywhere but end node
 					end = spot
-					end.make_end()
+					end.state = State.FINISH
 
 				elif spot != end and spot != start: #make barrier anywhere but start/end node
-					spot.make_barrier()
+					spot.state = State.BARRIER
 
             # Clearing Grid Node
 			elif pygame.mouse.get_pressed()[2]: # RIGHT-CLICK
