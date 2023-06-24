@@ -1,8 +1,8 @@
 import pygame
 import math
 from queue import PriorityQueue, Queue
+from collections import deque
 from enum import Enum
-
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -18,7 +18,7 @@ class State(Enum):
 	BARRIER = '#434343'
 	QUEUE = '#ebbfff'
 	VISITING = '#fc03c6'
-	VISITED = '#83fce0'
+	came_from = '#83fce0'
 	PATH = '#f2fc83'
 
 class Node:
@@ -71,7 +71,6 @@ class Node:
 
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier() and grid[self.row][self.col - 1]:
 			self.neighbors.append(grid[self.row][self.col - 1])
-
 	
 
 def manhattan(p1, p2):
@@ -125,36 +124,60 @@ def reconstruct_path(came_from, current, draw):
 			current.state = State.PATH
 		draw()
 
-
-def bfs(draw, grid, start, end):
-	que = Queue()
+def bfs(draw, start, end):
+	print('BFS')
+	que = Queue() #initial queue
 	que.put(start)
-	came_from = {}
+	came_from = {} #Visited
 	came_from[start] = None
 
-	while not que.empty():
+	while not que.empty(): 
 		for event in pygame.event.get():
 			if event.type == pygame.QUIT:
 				pygame.quit()
 				return False
 
-		cur = que.get()
-		if cur == end:
+		cur = que.get() #remove node and set to curr
+		if cur == end: #path found
 			reconstruct_path(came_from, end, draw)
-			end.state = State.FINISH
+			end.state = State.FINISH #change color
 			return True
 
-		for n in cur.neighbors:
+		for n in cur.neighbors: #traverse neighbors not visted
 			if n not in came_from:
-				came_from[n] = cur
-				n.state = State.VISITED
+				came_from[n] = cur #add to visted
+				n.state = State.came_from #color update
 				draw()
-				que.put(n)	
+				que.put(n)	#add neighbor to queue
 		
 	return False
 
+def dfs(draw, current, end, came_from):
+    if current == end:  # Path found
+        reconstruct_path(came_from, end, draw)
+        return True
+
+    for neighbor in current.neighbors:
+        if neighbor not in came_from:
+            came_from[neighbor] = current  # Add to visited nodes
+            neighbor.state = State.came_from  # Color update
+            draw()  # Update the visualization
+
+            if dfs(draw, neighbor, end, came_from):
+                return True
+
+    return False
+
+
+def dfs_search(draw, start, end):
+    came_from = {}  # Visited nodes
+    came_from[start] = None
+
+    return dfs(draw, start, end, came_from)
+
 
 def main(win, width):
+	pygame.font.init()
 	ROWS = 50
 	grid = make_grid(ROWS, width)
 
@@ -197,17 +220,21 @@ def main(win, width):
 
 			#begin Algorithm by updating neighbors for each node in grid
 			if event.type == pygame.KEYDOWN:
-				if event.key == pygame.K_SPACE and start and end:
+				if event.key == pygame.K_b and start and end: # b-key = bfs
 					for row in grid:
 						for spot in row:
 							spot.update_neighbors(grid)
-					bfs(lambda: draw(win, grid, ROWS, width), grid, start, end)
+					bfs(lambda: draw(win, grid, ROWS, width), start, end)
+				if event.key == pygame.K_d and start and end: # d-key = dfs
+					for row in grid:
+						for spot in row:
+							spot.update_neighbors(grid)
+					dfs_search(lambda: draw(win, grid, ROWS, width), start, end)
 				#clear grid
 				if event.key == pygame.K_c:  # C-key
 					start = None
 					end = None
 					grid = make_grid(ROWS, width)
-		pygame.display.update()
 	pygame.quit()
 
 if __name__ == "__main__":
