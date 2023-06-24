@@ -72,7 +72,6 @@ class Node:
 		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier() and grid[self.row][self.col - 1]:
 			self.neighbors.append(grid[self.row][self.col - 1])
 	
-
 def manhattan(p1, p2):
 	x1, y1 = p1
 	x2, y2 = p2
@@ -168,13 +167,11 @@ def dfs(draw, current, end, came_from):
 
     return False
 
-
 def dfs_search(draw, start, end):
     came_from = {}  # Visited nodes
     came_from[start] = None
 
     return dfs(draw, start, end, came_from)
-
 
 def main(win, width):
 	pygame.font.init()
