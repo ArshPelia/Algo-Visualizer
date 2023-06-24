@@ -60,17 +60,18 @@ class Node:
 	
 	def update_neighbors(self, grid):
 		self.neighbors = []
-		if self.row < self.rows_tot - 1 and not grid[self.row + 1][self.col].is_barrier(): # DOWN
+		if self.row < self.rows_tot - 1 and not grid[self.row + 1][self.col].is_barrier() and grid[self.row + 1][self.col]:
 			self.neighbors.append(grid[self.row + 1][self.col])
 
-		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier(): # UP
+		if self.row > 0 and not grid[self.row - 1][self.col].is_barrier() and grid[self.row - 1][self.col]:
 			self.neighbors.append(grid[self.row - 1][self.col])
 
-		if self.col < self.rows_tot - 1 and not grid[self.row][self.col + 1].is_barrier(): # RIGHT
+		if self.col < self.rows_tot - 1 and not grid[self.row][self.col + 1].is_barrier() and grid[self.row][self.col + 1]:
 			self.neighbors.append(grid[self.row][self.col + 1])
 
-		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier(): # LEFT
+		if self.col > 0 and not grid[self.row][self.col - 1].is_barrier() and grid[self.row][self.col - 1]:
 			self.neighbors.append(grid[self.row][self.col - 1])
+
 	
 
 def manhattan(p1, p2):
@@ -116,38 +117,42 @@ def get_clicked_pos(pos, rows, width):
 	return row, col
 
 def reconstruct_path(came_from, current, draw):
-    while current in came_from:
-        current = came_from[current]
-        if current is None:
-            break
-        if current.state != State.START and current.state != State.FINISH:
-            current.state = State.PATH
-        draw()
+	while current in came_from:
+		current = came_from[current]
+		if current is None:
+			break
+		if current.state != State.START and current.state != State.FINISH:
+			current.state = State.PATH
+		draw()
 
 
 def bfs(draw, grid, start, end):
-	que = []
-	que.append(start) #insert start node
-	came_from = {} # dict to track parents of each visited node (visited nodes)
+	que = Queue()
+	que.put(start)
+	came_from = {}
 	came_from[start] = None
 
-	while que:
-		cur = que.pop()#remove node from queue and set to current node
-		if cur == end: 
-			reconstruct_path(came_from, end, draw) # show path if found from end to start
+	while not que.empty():
+		for event in pygame.event.get():
+			if event.type == pygame.QUIT:
+				pygame.quit()
+				return False
+
+		cur = que.get()
+		if cur == end:
+			reconstruct_path(came_from, end, draw)
 			end.state = State.FINISH
 			return True
-		
+
 		for n in cur.neighbors:
-			if n not in came_from: # check if node hasn't been visited
-				# update its came_from value with the current node, add it to the queue
-				que.append(n)
-				came_from[n] = cur 
-				# mark it as "visited," and draw the updated grid:
+			if n not in came_from:
+				came_from[n] = cur
 				n.state = State.VISITED
 				draw()
+				que.put(n)	
 		
-	return False # path not found 
+	return False
+
 
 def main(win, width):
 	ROWS = 50
