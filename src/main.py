@@ -152,26 +152,26 @@ def bfs(draw, start, end):
 	return False
 
 def dfs(draw, current, end, came_from):
-    if current == end:  # Path found
-        reconstruct_path(came_from, end, draw)
-        return True
+	if current == end:  # Path found
+		reconstruct_path(came_from, end, draw)
+		end.state = State.FINISH #change color
+		return True
 
-    for neighbor in current.neighbors:
-        if neighbor not in came_from:
-            came_from[neighbor] = current  # Add to visited nodes
-            neighbor.state = State.came_from  # Color update
-            draw()  # Update the visualization
+	for neighbor in current.neighbors:
+		if neighbor not in came_from:
+			came_from[neighbor] = current  # Add to visited nodes
+			neighbor.state = State.came_from  # Color update
+			draw()  # Update the visualization
 
-            if dfs(draw, neighbor, end, came_from):
-                return True
+			if dfs(draw, neighbor, end, came_from):
+				return True
 
-    return False
+	return False
 
 def dfs_search(draw, start, end):
-    came_from = {}  # Visited nodes
-    came_from[start] = None
-
-    return dfs(draw, start, end, came_from)
+	came_from = {}  # Visited nodes
+	came_from[start] = None
+	return dfs(draw, start, end, came_from)
 
 def main(win, width):
 	pygame.font.init()
