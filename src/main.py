@@ -8,11 +8,13 @@ pygame.display.set_caption('A* Path Finding Algo')
 
 class State:
     """ Different states a node may be in """
-    NORMAL = '#f6f4f2'
+    # NORMAL = '#f6f4f2'
+    NORMAL = '#0f042b'
     START = '#71DE5F'
     FINISH = '#F15353'
     WEIGHT = '#eba173'
-    BARRIER = '#434343'
+    # BARRIER = '#434343'
+    BARRIER = '#dad0f5'
     QUEUE = '#ebbfff'
     VISITING = '#fc03c6'
     CAME_FROM = '#83fce0'
@@ -82,11 +84,12 @@ def make_grid(rows, width):
 
 def draw_grid(win, rows, width):
     gap = width // rows
-    grey = (128, 128, 128)
+    # grey = (128, 128, 128)
+    line_col = '#878391'
     for i in range(rows):
-        pygame.draw.line(win, grey, (0, i * gap), (width, i * gap))
+        pygame.draw.line(win, line_col, (0, i * gap), (width, i * gap))
         for j in range(rows):
-            pygame.draw.line(win, grey, (j * gap, 0), (j * gap, width))
+            pygame.draw.line(win, line_col, (j * gap, 0), (j * gap, width))
 
 def draw(win, grid, rows, width):
     win.fill('#f6f4f2')
