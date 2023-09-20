@@ -123,8 +123,6 @@ def reconstruct_path(came_from, current, draw):
             current.state = State.PATH
         draw()
 
-
-
 def bfs(draw, start, end):
     print('BFS')
     que = PriorityQueue()
@@ -180,7 +178,6 @@ def heuristic(p1, p2):
     x2, y2 = p2
     return abs(x1 - x2) + abs(y1 - y2)
 
-
 def a_star(draw, grid, start, end):
     count = 0
     open_set = PriorityQueue()
@@ -222,7 +219,6 @@ def a_star(draw, grid, start, end):
             current.state = State.VISITING
 
     return False
-
 
 def display_controls_popup():
     root = tk.Tk()
