@@ -1,6 +1,9 @@
 import pygame
 import numpy as np
 from queue import PriorityQueue
+import tkinter as tk
+from tkinter import messagebox
+
 
 WIDTH = 800
 WIN = pygame.display.set_mode((WIDTH, WIDTH))
@@ -8,12 +11,10 @@ pygame.display.set_caption('A* Path Finding Algo')
 
 class State:
     """ Different states a node may be in """
-    # NORMAL = '#f6f4f2'
     NORMAL = '#0f042b'
     START = '#71DE5F'
     FINISH = '#F15353'
     WEIGHT = '#eba173'
-    # BARRIER = '#434343'
     BARRIER = '#dad0f5'
     QUEUE = '#ebbfff'
     VISITING = '#fc03c6'
@@ -223,6 +224,21 @@ def a_star(draw, grid, start, end):
     return False
 
 
+def display_controls_popup():
+    root = tk.Tk()
+    root.withdraw()  # Hide the root window
+
+    messagebox.showinfo("Controls", """
+    Controls:
+    - Left-click: Place start and finish nodes
+    - Right-click: Remove barriers or reset start/finish nodes
+    - B key: Run BFS algorithm
+    - D key: Run DFS algorithm
+    - A key: Run A* algorithm
+    - C key: Clear the grid
+    - Esc key: Quit the program
+    """)
+
 def main(win, width):
     pygame.font.init()
     ROWS = 50
@@ -289,4 +305,5 @@ def main(win, width):
     pygame.quit()
 
 if __name__ == '__main__':
+    display_controls_popup()
     main(WIN, WIDTH)
