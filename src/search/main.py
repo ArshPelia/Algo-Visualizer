@@ -31,6 +31,9 @@ class Node:
         self._state = State.NORMAL
         self.neighbors = []
 
+    def get_pos(self):
+        return self.row, self.col
+
     def __repr__(self):
         return '<Node {}, State \'{}\'>'.format((self.row, self.col), self.state.name)
     
@@ -111,13 +114,15 @@ def get_clicked_pos(pos, rows, width):
     return row, col
 
 def reconstruct_path(came_from, current, draw):
-    while current in came_from:
+    while current in came_from and current != None:  # Add "and current != None" to the condition
         current = came_from[current]
         if current is None:
             break
         if current.state != State.START and current.state != State.FINISH:
             current.state = State.PATH
         draw()
+
+
 
 def bfs(draw, start, end):
     print('BFS')
@@ -168,6 +173,55 @@ def dfs_search(draw, start, end):
     came_from = {}
     came_from[start] = None
     return dfs(draw, start, end, came_from)
+
+def heuristic(p1, p2):
+    x1, y1 = p1
+    x2, y2 = p2
+    return abs(x1 - x2) + abs(y1 - y2)
+
+
+def a_star(draw, grid, start, end):
+    count = 0
+    open_set = PriorityQueue()
+    open_set.put((0, count, start))
+    came_from = {}
+    g_score = {node: float("inf") for row in grid for node in row}
+    g_score[start] = 0
+    f_score = {node: float("inf") for row in grid for node in row}
+    f_score[start] = heuristic(start.get_pos(), end.get_pos())
+
+    while not open_set.empty():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
+        current = open_set.get()[2]
+
+        if current == end:
+            reconstruct_path(came_from, end, draw)
+            end.state = State.FINISH
+            return True
+
+        for neighbor in current.neighbors:
+            temp_g_score = g_score[current] + 1
+
+            if temp_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = temp_g_score
+                f_score[neighbor] = temp_g_score + heuristic(neighbor.get_pos(), end.get_pos())
+                if neighbor not in [node[2] for node in open_set.queue]:
+                    count += 1
+                    open_set.put((f_score[neighbor], count, neighbor))
+                    neighbor.state = State.QUEUE
+
+        draw()
+
+        if current != start:
+            current.state = State.VISITING
+
+    return False
+
 
 def main(win, width):
     pygame.font.init()
@@ -220,6 +274,13 @@ def main(win, width):
                         for spot in row:
                             spot.update_neighbors(grid)
                     dfs_search(lambda: draw(win, grid, ROWS, width), start, end)
+
+                if event.key == pygame.K_a and start and end:  # a-key = A* search
+                    for row in grid:
+                        for spot in row:
+                            spot.update_neighbors(grid)
+                    a_star(lambda: draw(win, grid, ROWS, width), grid, start, end)
+                
                 if event.key == pygame.K_c:  # c-key = clear
                     start = None
                     end = None
