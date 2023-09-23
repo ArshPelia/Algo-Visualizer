@@ -5,12 +5,12 @@ import subprocess
 
 def run_search_algorithm_visualization():
     # Execute the search algorithm visualization script
-    subprocess.run(["python", "src\sort\main.py"])
+    subprocess.run(["python", "src\search\search.py"])
 
 
 def run_sort_algorithm_visualization():
     # Execute the sort algorithm visualization script
-    subprocess.run(["python", "src\search\main.py"])
+    subprocess.run(["python", "src\sort\sort.py"])
 
 
 def show_info():
