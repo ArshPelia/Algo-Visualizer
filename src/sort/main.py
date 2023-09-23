@@ -13,6 +13,7 @@ BAR_COLOR = (0, 0, 255)
 RESET_KEY = 'r'
 bSORT_KEY = 'b'
 sSORT_KEY = 's'
+iSORT_KEY = 'i'
 
 # Pygame setup
 pygame.init()
@@ -47,6 +48,24 @@ def select_sort(arr):
         yield arr
 
 
+def insertion_sort(arr):
+
+    # Traverse through 1 to len(arr)
+    for i in range(1, len(arr)):
+
+        key = arr[i]
+
+        # Move elements of arr[0..i-1], that are
+        # greater than key, to one position ahead
+        # of their current position
+        j = i-1
+        while j >= 0 and key < arr[j]:
+            arr[j + 1] = arr[j]
+            j -= 1
+        arr[j + 1] = key
+    yield arr
+
+
 def main():
     # Initialize variables
     array = create_random_array(ARRAY_SIZE)
@@ -66,6 +85,10 @@ def main():
             sorting = True
             array_copy = array.copy()
             sort_generator = select_sort(array_copy)
+        elif key == iSORT_KEY and not sorting:
+            sorting = True
+            array_copy = array.copy()
+            sort_generator = insertion_sort(array_copy)
 
     # Create a Tkinter window
     root = tk.Tk()
@@ -78,16 +101,22 @@ def main():
     # Create labels to display controls
     controls_label = tk.Label(root, text="Controls:")
     controls_label.pack()
-    reset_label = tk.Label(root, text="- Press 'r' key: Reset Array")
+
+    reset_label = tk.Label(root, text="'r' key: Reset Array")
     reset_label.pack()
+
     bubble_sort_label = tk.Label(
-        root, text="- Press 'b' key: Run bubble sort algorithm")
+        root, text="'b' key: Run bubble sort algorithm")
     bubble_sort_label.pack()
     select_sort_label = tk.Label(
-        root, text="- Press 's' key: Run selection sort algorithm")
+        root, text="'s' key: Run selection sort algorithm")
     select_sort_label.pack()
-    quit_label = tk.Label(root, text="- Press 'Esc' key: Quit the program")
-    quit_label.pack()
+    insertion_sort_label = tk.Label(
+        root, text="'i' key: Run insertion sort algorithm")
+    insertion_sort_label.pack()
+
+    # quit_label = tk.Label(root, text="'Esc' key: Quit the program")
+    # quit_label.pack()
 
     root.bind("<Key>", on_key)  # Bind key events
 
