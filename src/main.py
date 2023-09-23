@@ -26,6 +26,17 @@ def show_info():
 
 # Create the main menu window
 root = tk.Tk()
+# Get the screen width and height
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+
+# Set the window dimensions to fit the screen
+window_width = screen_width // 2  # You can adjust this as needed
+window_height = screen_height // 2  # You can adjust this as needed
+
+# Set the window size
+root.geometry(f"{window_width}x{window_height}")
+
 root.title("Algorithm Visualization Menu")
 
 # Create a label with information
@@ -35,15 +46,15 @@ info_label.pack(pady=20)
 # Create buttons for search and sort algorithms
 search_button = tk.Button(root, text="Search Algorithms",
                           command=run_search_algorithm_visualization)
-search_button.pack()
+search_button.pack(pady=20)
 
 sort_button = tk.Button(root, text="Sort Algorithms",
                         command=run_sort_algorithm_visualization)
-sort_button.pack()
+sort_button.pack(pady=20)
 
 # Create an info button to display information about the menu
 info_button = tk.Button(root, text="Info", command=show_info)
-info_button.pack()
+info_button.pack(pady=20)
 
 # Start the main loop
 root.mainloop()
