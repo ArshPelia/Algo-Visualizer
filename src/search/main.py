@@ -6,7 +6,8 @@ from tkinter import messagebox
 
 
 WIDTH = 800
-WIN = pygame.display.set_mode((WIDTH, WIDTH))
+HEIGHT = 600
+WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('A* Path Finding Algo')
 
 
