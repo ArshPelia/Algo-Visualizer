@@ -10,13 +10,12 @@ HEIGHT = 600
 ARRAY_SIZE = 100
 BACKGROUND_COLOR = (255, 255, 255)
 BAR_COLOR = (0, 0, 255)
-RESET_KEY = pygame.K_r
-bSORT_KEY = pygame.K_b
-sSORT_KEY = pygame.K_s
+RESET_KEY = 'r'
+bSORT_KEY = 'b'
+sSORT_KEY = 's'
 
 # Pygame setup
 pygame.init()
-window = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Sorting Algorithm Visualizer")
 clock = pygame.time.Clock()
 
@@ -40,15 +39,10 @@ def bubble_sort(arr):
 
 def select_sort(arr):
     for i in range(len(arr)):
-        # Find the minimum element in remaining
-        # unsorted array
         min_idx = i
         for j in range(i+1, len(arr)):
             if arr[min_idx] > arr[j]:
                 min_idx = j
-
-        # Swap the found minimum element with
-        # the first element
         arr[i], arr[min_idx] = arr[min_idx], arr[i]
         yield arr
 
@@ -59,25 +53,53 @@ def main():
     sorting = False
     sort_generator = None
 
+    def on_key(event):
+        nonlocal sorting, sort_generator, array
+        key = event.keysym
+        if key == RESET_KEY and not sorting:
+            array = create_random_array(ARRAY_SIZE)
+        elif key == bSORT_KEY and not sorting:
+            sorting = True
+            array_copy = array.copy()
+            sort_generator = bubble_sort(array_copy)
+        elif key == sSORT_KEY and not sorting:
+            sorting = True
+            array_copy = array.copy()
+            sort_generator = select_sort(array_copy)
+
+    # Create a Tkinter window
+    root = tk.Tk()
+    root.title("Sorting Algorithm Visualizer")
+
+    # Create a Canvas widget to embed the Pygame window
+    canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
+    canvas.pack()
+
+    # Create labels to display controls
+    controls_label = tk.Label(root, text="Controls:")
+    controls_label.pack()
+    reset_label = tk.Label(root, text="- Press 'r' key: Reset Array")
+    reset_label.pack()
+    bubble_sort_label = tk.Label(
+        root, text="- Press 'b' key: Run bubble sort algorithm")
+    bubble_sort_label.pack()
+    select_sort_label = tk.Label(
+        root, text="- Press 's' key: Run selection sort algorithm")
+    select_sort_label.pack()
+    quit_label = tk.Label(root, text="- Press 'Esc' key: Quit the program")
+    quit_label.pack()
+
+    root.bind("<Key>", on_key)  # Bind key events
+
     # Main loop
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN:
-                if event.key == RESET_KEY and not sorting:
-                    array = create_random_array(ARRAY_SIZE)
-                elif event.key == bSORT_KEY and not sorting:
-                    sorting = True
-                    array_copy = array.copy()
-                    sort_generator = bubble_sort(array_copy)
-                elif event.key == sSORT_KEY and not sorting:
-                    sorting = True
-                    array_copy = array.copy()
-                    sort_generator = select_sort(array_copy)
 
-        window.fill(BACKGROUND_COLOR)
+        # Clear the Canvas
+        canvas.delete("all")
 
         # Sorting animation
         if sorting:
@@ -86,32 +108,20 @@ def main():
             except StopIteration:
                 sorting = False
 
-        # Draw the bars
+        # Draw the bars on the Canvas
         bar_width = WIDTH // len(array)
         for i, height in enumerate(array):
-            pygame.draw.rect(window, BAR_COLOR, (i * bar_width,
-                             HEIGHT - height, bar_width, height))
+            canvas.create_rectangle(
+                i * bar_width, HEIGHT - height, (i + 1) * bar_width, HEIGHT, fill="blue"
+            )
 
-        pygame.display.update()
+        root.update_idletasks()
+        root.update()
         clock.tick(120)
 
     pygame.quit()
     sys.exit()
 
 
-def display_controls_popup():
-    root = tk.Tk()
-    root.withdraw()  # Hide the root window
-
-    messagebox.showinfo("Controls", """
-    Controls:
-    - r key: Reset Array
-    - b key: Run bubble sort algorithm
-    - s key: Run selection sort algorithm
-    - Esc key: Quit the program
-    """)
-
-
 if __name__ == "__main__":
-    display_controls_popup()
     main()
