@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Sorting Algorithm Visualizer</title>
+</head>
+<body>
+  <canvas id="canvas" width="800" height="600"></canvas>
+  <div id="controls">
+    <label>Controls:</label><br>
+    <button id="resetButton">Reset Array</button><br>
+    <button id="bubbleSortButton">Bubble Sort</button><br>
+    <button id="selectionSortButton">Selection Sort</button><br>
+    <button id="insertionSortButton">Insertion Sort</button><br>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const WIDTH = canvas.width;
+    const HEIGHT = canvas.height;
+    const ARRAY_SIZE = 100;
+    const BAR_COLOR = "blue";
+
+    let array = createRandomArray(ARRAY_SIZE);
+    let sorting = false;
+    let sortGenerator = null;
+
+    // Create an initial random array
+    function createRandomArray(size) {
+      const arr = [];
+      for (let i = 0; i < size; i++) {
+        arr.push(Math.floor(Math.random() * (450 - 50 + 1)) + 50);
+      }
+      return arr;
+    }
+
+    // Bubble Sort function as a generator
+    function* bubbleSort(arr) {
+      const n = arr.length;
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n - i - 1; j++) {
+          if (arr[j] > arr[j + 1]) {
+            [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];
+            yield arr;
+          }
+        }
+      }
+    }
+
+    function* selectionSort(arr) {
+      const n = arr.length;
+      for (let i = 0; i < n; i++) {
+        let minIndex = i;
+        for (let j = i + 1; j < n; j++) {
+          if (arr[j] < arr[minIndex]) {
+            minIndex = j;
+          }
+        }
+        if (minIndex !== i) {
+          [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+          yield arr;
+        }
+      }
+    }
+
+    function* insertionSort(arr) {
+      const n = arr.length;
+      for (let i = 1; i < n; i++) {
+        const key = arr[i];
+        let j = i - 1;
+        while (j >= 0 && arr[j] > key) {
+          arr[j + 1] = arr[j];
+          j = j - 1;
+        }
+        arr[j + 1] = key;
+        yield arr;
+      }
+    }
+
+    // Event listener for action buttons
+    document.getElementById("resetButton").addEventListener("click", () => {
+      if (!sorting) {
+        array = createRandomArray(ARRAY_SIZE);
+        drawBars();
+      }
+    });
+
+    document.getElementById("bubbleSortButton").addEventListener("click", () => {
+      if (!sorting) {
+        sorting = true;
+        const arrayCopy = [...array];
+        sortGenerator = bubbleSort(arrayCopy);
+        animateSorting();
+      }
+    });
+
+    document.getElementById("selectionSortButton").addEventListener("click", () => {
+      if (!sorting) {
+        sorting = true;
+        const arrayCopy = [...array];
+        sortGenerator = selectionSort(arrayCopy);
+        animateSorting();
+      }
+    });
+
+    document.getElementById("insertionSortButton").addEventListener("click", () => {
+      if (!sorting) {
+        sorting = true;
+        const arrayCopy = [...array];
+        sortGenerator = insertionSort(arrayCopy);
+        animateSorting();
+      }
+    });
+
+    // Function to animate the sorting
+    function animateSorting() {
+    const animationId = requestAnimationFrame(function step() {
+        if (sorting) {
+        try {
+            array = sortGenerator.next().value;
+        } catch (error) {
+            if (error instanceof StopIteration) {
+            sorting = false; // Sorting is complete
+            } else {
+            throw error; // Propagate other errors
+            }
+        }
+        drawBars();
+        if (sorting) {
+            requestAnimationFrame(step);
+        }
+        }
+    });
+    }
+
+
+    // Function to draw the bars on the canvas
+    function drawBars() {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+      const barWidth = WIDTH / array.length;
+      for (let i = 0; i < array.length; i++) {
+        ctx.fillStyle = BAR_COLOR;
+        ctx.fillRect(i * barWidth, HEIGHT - array[i], barWidth, array[i]);
+      }
+    }
+
+    // Initial drawing of bars
+    drawBars();
+  </script>
+</body>
+</html>
